@@ -1,43 +1,76 @@
-"""Tests for views."""
+import pytest
+from models import Pet, db
 
 def test_homepage(client):
-    """Test homepage."""
-    response = client.get('/')
-    assert response.status_code == 200
-    assert b'Our Pets' in response.data
+    """Test homepage route"""
+    resp = client.get('/')
+    assert resp.status_code == 200
+    assert b'Our Pets' in resp.data
 
-def test_add_pet(client):
-    """Test add pet route."""
-    # Test GET request
-    response = client.get('/add')
-    assert response.status_code == 200
-    assert b'Add a Pet' in response.data
+def test_add_pet(app, client):
+    """Test add pet route"""
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        
+        data = {
+            'name': 'TestPet',
+            'species': 'dog',
+            'photo_url': 'http://example.com/photo.jpg',
+            'age': '3',
+            'notes': 'Test notes about this pet'
+        }
+        
+        resp = client.post('/add', data=data, follow_redirects=True)
+        assert resp.status_code == 200
+        
+        pet = Pet.query.filter_by(name='TestPet').first()
+        assert pet is not None
+        assert pet.species == 'dog'
 
-    # Test POST request
-    data = {
-        'name': 'NewPet',
-        'species': 'cat',
-        'photo_url': 'http://example.com/photo.jpg',
-        'age': '3',
-        'notes': 'Test notes for new pet'
-    }
-    response = client.post('/add', data=data, follow_redirects=True)
-    assert response.status_code == 200
-    assert b'NewPet' in response.data
+        # Clean up
+        db.session.remove()
+        db.drop_all()
 
-def test_edit_pet(client, sample_pet):
-    """Test edit pet route."""
-    # Test GET request
-    response = client.get(f'/{sample_pet.id}')
-    assert response.status_code == 200
-    assert sample_pet.name.encode() in response.data
+def test_edit_pet(app, client):
+    """Test edit pet route"""
+    with app.app_context():
+        db.drop_all()
+        db.create_all()
+        
+        # Create a pet
+        pet = Pet(
+            name="TestPet",
+            species="dog",
+            photo_url="http://example.com/photo.jpg",
+            age=3,
+            notes="Original notes",
+            available=True
+        )
+        db.session.add(pet)
+        db.session.commit()
+        pet_id = pet.id
 
-    # Test POST request
-    data = {
-        'photo_url': 'http://example.com/new-photo.jpg',
-        'notes': 'Updated test notes',
-        'available': False
-    }
-    response = client.post(f'/{sample_pet.id}', data=data, follow_redirects=True)
-    assert response.status_code == 200
-    assert b'Updated test notes' in response.data
+        # Test GET request
+        resp = client.get(f'/{pet_id}')
+        assert resp.status_code == 200
+        assert b'TestPet' in resp.data
+
+        # Test POST request
+        data = {
+            'photo_url': 'http://example.com/new-photo.jpg',
+            'notes': 'Updated notes about this pet',
+            'available': 'false'
+        }
+        
+        resp = client.post(f'/{pet_id}', data=data, follow_redirects=True)
+        assert resp.status_code == 200
+
+        updated_pet = Pet.query.get(pet_id)
+        assert updated_pet.photo_url == 'http://example.com/new-photo.jpg'
+        assert updated_pet.notes == 'Updated notes about this pet'
+        assert updated_pet.available is False
+
+        # Clean up
+        db.session.remove()
+        db.drop_all()
