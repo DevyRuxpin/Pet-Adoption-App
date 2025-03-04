@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h1 class="text-center mb-4">Add a Pet</h1>
+        {% include "_form.html" %}
+        <a href="{{ url_for('list_pets') }}" class="btn btn-secondary mt-3">Back to List</a>
+    </div>
+</div>
+{% endblock %}
