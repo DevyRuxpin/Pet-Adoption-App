@@ -4,7 +4,6 @@ from models import Pet, db
 def test_pet_model(app):
     """Test basic pet model"""
     with app.app_context():
-        # Clear any existing data
         db.drop_all()
         db.create_all()
         
@@ -25,17 +24,9 @@ def test_pet_model(app):
         assert pet.species == "dog"
         assert pet.available is True
 
-        # Clean up
-        db.session.remove()
-        db.drop_all()
-
 def test_image_url(app):
     """Test image_url method"""
     with app.app_context():
-        # Clear any existing data
-        db.drop_all()
-        db.create_all()
-        
         # Test with photo_url
         pet1 = Pet(
             name="TestPet1",
@@ -49,8 +40,5 @@ def test_image_url(app):
             name="TestPet2",
             species="dog"
         )
-        assert "default" in pet2.image_url().lower()
-
-        # Clean up
-        db.session.remove()
-        db.drop_all()
+        expected_default = "https://example.com/default-pet-image.jpg"
+        assert pet2.image_url() == expected_default
