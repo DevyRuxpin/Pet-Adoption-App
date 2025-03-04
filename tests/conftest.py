@@ -1,31 +1,26 @@
-import os
 import pytest
 from app import app as flask_app
-from models import db, Pet
+from models import db
 
 @pytest.fixture
 def app():
     """Create and configure a new app instance for each test."""
-    # ensure the app is configured for testing
-    flask_app.config.from_object('config.TestConfig')
+    flask_app.config['TESTING'] = True
+    flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/adopt_test'
+    flask_app.config['WTF_CSRF_ENABLED'] = False  # Disable CSRF for testing
     
-    # Create the database and tables
+    # Create tables for each test
     with flask_app.app_context():
         db.create_all()
     
     yield flask_app
     
-    # Clean up / reset resources
+    # Clean up after each test
     with flask_app.app_context():
+        db.session.remove()
         db.drop_all()
 
 @pytest.fixture
 def client(app):
     """A test client for the app."""
     return app.test_client()
-
-@pytest.fixture
-def session(app):
-    """A database session for the tests."""
-    with app.app_context():
-        yield db.session
