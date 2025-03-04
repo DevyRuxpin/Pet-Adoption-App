@@ -1,18 +1,26 @@
 """Flask app for adopt app."""
 
+import os
 from flask import Flask, url_for, render_template, redirect, flash, jsonify
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, Pet
 from forms import AddPetForm, EditPetForm
+from config import TestConfig, DevelopmentConfig
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = "abcdef"
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql:///adopt"
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Use TestConfig if FLASK_ENV is 'testing', otherwise use DevelopmentConfig
+app.config.from_object(
+    TestConfig if os.environ.get('FLASK_ENV') == 'testing' 
+    else DevelopmentConfig
+)
 
 connect_db(app)
-db.create_all()
+
+# Move db.create_all() to only run when file is executed directly
+if __name__ == '__main__':
+    db.create_all()
+    app.run(debug=True)
 
 toolbar = DebugToolbarExtension(app)
 
@@ -53,5 +61,3 @@ def edit_pet(pet_id):
 
     return render_template("pet_edit_form.html", form=form, pet=pet)
 
-if __name__ == '__main__':
-    app.run(debug=True)
