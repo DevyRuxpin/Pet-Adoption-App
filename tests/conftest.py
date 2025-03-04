@@ -6,7 +6,7 @@ from forms import AddPetForm, EditPetForm
 @pytest.fixture
 def app():
     flask_app.config['TESTING'] = True
-    flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@localhost:5432/adopt_test'
+    flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@127.0.0.1:5432/adopt_test'
     flask_app.config['WTF_CSRF_ENABLED'] = False
     
     with flask_app.app_context():
