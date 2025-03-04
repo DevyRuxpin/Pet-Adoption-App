@@ -7,11 +7,11 @@ GENERIC_IMAGE = "https://mylostpetalert.com/wp-content/themes/mlpa-child/images/
 db = SQLAlchemy()
 
 class Pet(db.Model):
-    """Adoptable pet."""
+    """Pet Model"""
 
     __tablename__ = "pets"
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.Text, nullable=False)
     species = db.Column(db.Text, nullable=False)
     photo_url = db.Column(db.Text)
@@ -21,7 +21,8 @@ class Pet(db.Model):
 
     def image_url(self):
         """Return image for pet -- bespoke or generic."""
-        return self.photo_url or GENERIC_IMAGE
+        return self.photo_url or "https://example.com/default-pet-image.jpg"
+
 
 def connect_db(app):
     """Connect this database to provided Flask app."""
