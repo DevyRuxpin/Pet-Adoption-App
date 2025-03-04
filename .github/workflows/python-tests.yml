@@ -40,7 +40,7 @@ jobs:
 
     - name: Run tests with pytest
       env:
-        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/adopt_test
+        DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/adopt_test
         FLASK_ENV: testing
       run: |
         pytest --cov=. --cov-report=xml
