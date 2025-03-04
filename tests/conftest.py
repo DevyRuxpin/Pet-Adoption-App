@@ -1,34 +1,31 @@
+import os
 import pytest
 from app import app as flask_app
 from models import db, Pet
-from forms import AddPetForm, EditPetForm
 
 @pytest.fixture
 def app():
-    flask_app.config['TESTING'] = True
-    flask_app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:postgres@127.0.0.1:5432/adopt_test'
-    flask_app.config['WTF_CSRF_ENABLED'] = False
+    """Create and configure a new app instance for each test."""
+    # ensure the app is configured for testing
+    flask_app.config.from_object('config.TestConfig')
     
+    # Create the database and tables
     with flask_app.app_context():
         db.create_all()
-        yield flask_app
-        db.session.remove()
+    
+    yield flask_app
+    
+    # Clean up / reset resources
+    with flask_app.app_context():
         db.drop_all()
 
 @pytest.fixture
 def client(app):
+    """A test client for the app."""
     return app.test_client()
 
 @pytest.fixture
-def sample_pet():
-    pet = Pet(
-        name="TestPet",
-        species="dog",
-        photo_url="http://example.com/photo.jpg",
-        age=5,
-        notes="Test notes",
-        available=True
-    )
-    db.session.add(pet)
-    db.session.commit()
-    return pet
+def session(app):
+    """A database session for the tests."""
+    with app.app_context():
+        yield db.session
