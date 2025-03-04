@@ -31,11 +31,7 @@ class AddPetForm(FlaskForm):
         "Age",
         validators=[
             Optional(),
-            NumberRange(
-                min=0,
-                max=30,
-                message="Age must be between 0 and 30"
-            )
+            NumberRange(min=0, max=30, message="Age must be between 0 and 30")
         ],
     )
 
@@ -43,10 +39,7 @@ class AddPetForm(FlaskForm):
         "Notes",
         validators=[
             Optional(),
-            Length(
-                min=10,
-                message="Notes must be at least 10 characters long"
-            )
+            Length(min=10, message="Notes must be at least 10 characters long")
         ],
     )
 
@@ -62,11 +55,9 @@ class EditPetForm(FlaskForm):
         "Notes",
         validators=[
             Optional(),
-            Length(
-                min=10,
-                message="Notes must be at least 10 characters long"
-            )
+            Length(min=10, message="Notes must be at least 10 characters long")
         ],
     )
 
     available = BooleanField("Available?")
+
