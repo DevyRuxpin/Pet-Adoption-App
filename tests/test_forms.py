@@ -5,33 +5,42 @@ def test_add_pet_form_validation(app):
     """Test AddPetForm validation"""
     with app.app_context():
         with app.test_request_context():
-            # Test valid data
-            form = AddPetForm(data={
-                'name': 'Fluffy',
-                'species': 'cat',
-                'photo_url': 'http://example.com/photo.jpg',
-                'age': 2,
-                'notes': 'A very good cat'
-            })
-            # WTF_CSRF_ENABLED is False in test config, so this should work
-            assert form.validate() == True, f"Form validation failed: {form.errors}"
+            # Create form with data
+            form_data = {
+                'name': 'Fluffy',  # required
+                'species': 'cat',  # required, must be one of the choices
+                'photo_url': 'http://example.com/photo.jpg',  # optional
+                'age': 2,  # optional
+                'notes': 'A very good cat'  # optional
+            }
+            
+            form = AddPetForm(formdata=None)
+            form.process(formdata=None, data=form_data)
+            
+            valid = form.validate()
+            if not valid:
+                print("Validation errors:", form.errors)  # Debug print
+            assert valid, f"Form validation failed: {form.errors}"
 
             # Test empty form
-            empty_form = AddPetForm(data={})
-            assert empty_form.validate() == False
+            empty_form = AddPetForm(formdata=None)
+            assert not empty_form.validate(), "Empty form should not validate"
 
 def test_edit_pet_form_validation(app):
     """Test EditPetForm validation"""
     with app.app_context():
         with app.test_request_context():
             # Test with valid data
-            form = EditPetForm(data={
+            form_data = {
                 'photo_url': 'http://example.com/photo.jpg',
-                'notes': 'Updated notes about the pet',
+                'notes': 'Updated notes about this pet',
                 'available': True
-            })
-            assert form.validate() == True, f"Form validation failed: {form.errors}"
+            }
+            
+            form = EditPetForm(formdata=None)
+            form.process(formdata=None, data=form_data)
+            assert form.validate(), f"Form validation failed: {form.errors}"
 
             # Empty form should be valid since all fields are optional
-            empty_form = EditPetForm(data={})
-            assert empty_form.validate() == True
+            empty_form = EditPetForm(formdata=None)
+            assert empty_form.validate(), "Empty edit form should validate"
